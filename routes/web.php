@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CheckStatusController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\CheckStatus;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -10,6 +12,10 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware([CheckStatus::class])->group(function(){
+    Route::get('checkStatus', [CheckStatusController::class,'checkStatus']);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
