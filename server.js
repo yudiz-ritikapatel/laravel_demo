@@ -3,6 +3,111 @@ const url = require('url');
 const fs = require('fs');
 const uc = require('upper-case');
 var events = require('events');
+var mysql = require('mysql');
+const env = require('dotenv').config();
+
+var con = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
+});
+
+// Connect to the MySQL server
+con.connect(function (err) {
+    if (err) throw err;
+    console.log("Connected to MySQL!");
+
+    // Create a database
+    con.query("CREATE DATABASE IF NOT EXISTS mydb", function (err, result) {
+        if (err) throw err;
+        console.log("Database created or already exists.");
+    });
+
+    // Use the database
+    con.query("USE mydb", function (err, result) {
+        if (err) throw err;
+        console.log("Using mydb database.");
+    });
+
+    // Create a table
+    const createTableSql = `
+        CREATE TABLE IF NOT EXISTS customers (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255),
+            address VARCHAR(255)
+        )
+    `;
+    con.query(createTableSql, function (err, result) {
+        if (err) throw err;
+        console.log("Table created or already exists.");
+    });
+
+    // Insert a record
+    const insertSql = "INSERT INTO customers (name, address) VALUES ('Company Inc', 'Highway 37')";
+    con.query(insertSql, function (err, result) {
+        if (err) throw err;
+        console.log("1 record inserted, ID:", result.insertId);
+    });
+
+    // Select all records
+    con.query("SELECT * FROM customers", function (err, result) {
+        if (err) throw err;
+        console.log("All records:", result);
+    });
+
+    // Select with WHERE clause
+    con.query("SELECT * FROM customers WHERE address = 'Highway 37'", function (err, result) {
+        if (err) throw err;
+        console.log("Filtered records:", result);
+    });
+
+    // Select with ORDER BY
+    con.query("SELECT * FROM customers ORDER BY name", function (err, result) {
+        if (err) throw err;
+        console.log("Ordered records:", result);
+    });
+
+    // Use parameterized queries
+    const adr = 'Highway 37';
+    const paramQuery = "SELECT * FROM customers WHERE address = ?";
+    con.query(paramQuery, [adr], function (err, result) {
+        if (err) throw err;
+        console.log("Parameterized query result:", result);
+    });
+
+    // Select with LIMIT
+    con.query("SELECT * FROM customers LIMIT 5", function (err, result) {
+        if (err) throw err;
+        console.log("Limited records:", result);
+    });
+
+    // Select with LIMIT and OFFSET
+    con.query("SELECT * FROM customers LIMIT 5 OFFSET 2", function (err, result) {
+        if (err) throw err;
+        console.log("Limited with offset records:", result);
+    });
+
+    // Delete a record
+    const deleteSql = "DELETE FROM customers WHERE address = 'Highway 37'";
+    con.query(deleteSql, function (err, result) {
+        if (err) throw err;
+        console.log("Number of records deleted:", result.affectedRows);
+    });
+
+    // Drop the table
+    const dropTableSql = "DROP TABLE IF EXISTS customers";
+    con.query(dropTableSql, function (err, result) {
+        if (err) throw err;
+        console.log("Table deleted (if exists).");
+    });
+
+    // Close the connection
+    con.end(function (err) {
+        if (err) throw err;
+        console.log("Connection closed.");
+    });
+});
 
 http.createServer(function (req, res) {
     const adr = 'http://localhost:8080/default.htm?year=2017&month=february';

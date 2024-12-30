@@ -16,8 +16,10 @@
         "vite": "^6.0"
     },
     "dependencies": {
+        "dotenv": "^16.4.7",
         "events": "^3.3.0",
         "formidable": "^3.5.2",
+        "mysql": "^2.18.1",
         "upper-case": "^2.0.2"
     }
 }
